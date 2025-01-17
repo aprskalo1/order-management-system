@@ -1,4 +1,5 @@
 using CustomerService.Data;
+using CustomerService.Exceptions;
 using CustomerService.Mapping;
 using CustomerService.Repositories;
 using CustomerService.Services;
@@ -8,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddControllers(options => { options.Filters.Add<CustomerExceptionFilter>(); });
 
 builder.Services.AddDbContext<CustomerDbContext>(options =>
     options.UseSqlServer("server=.;Database=CustomerData;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"));

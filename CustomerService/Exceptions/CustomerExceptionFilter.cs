@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace CustomerService.Exceptions;
 
-public class CustomerExceptionFilter
+public class CustomerExceptionFilter : IExceptionFilter
 {
     public void OnException(ExceptionContext context)
     {
