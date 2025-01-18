@@ -10,7 +10,7 @@ public class ContractExceptionFilter : IExceptionFilter
         if (context.Exception is not ContractCustomException contractCustomException) return;
         context.Result = context.Exception switch
         {
-            ContractNotFoundException => new NotFoundObjectResult(contractCustomException.Message),
+            ContractNotFoundException or ContractCustomerNotFoundException => new NotFoundObjectResult(contractCustomException.Message),
             _ => new BadRequestObjectResult(contractCustomException.Message)
         };
 

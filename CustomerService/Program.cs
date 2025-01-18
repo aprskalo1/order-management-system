@@ -1,6 +1,7 @@
 using CustomerService.Data;
 using CustomerService.Exceptions;
 using CustomerService.Mapping;
+using CustomerService.Messaging.RPC;
 using CustomerService.Repositories;
 using CustomerService.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,9 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService.Services.CustomerService>();
+
+builder.Services.AddSingleton<CustomerRpcServer>();
+builder.Services.AddHostedService<RpcServerHostedService>();
 
 var app = builder.Build();
 

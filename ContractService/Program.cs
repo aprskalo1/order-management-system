@@ -1,6 +1,7 @@
 using ContractService.Data;
 using ContractService.Exceptions;
 using ContractService.Mapping;
+using ContractService.Messaging.RPC;
 using ContractService.Repositories;
 using ContractService.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,9 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddScoped<IContractService, ContractService.Services.ContractService>();
+
+builder.Services.AddSingleton<CustomerRpcClient>();
+builder.Services.AddHostedService<RpcClientHostedService>();
 
 var app = builder.Build();
 

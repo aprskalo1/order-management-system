@@ -7,3 +7,10 @@ internal class ContractNotFoundException(string message) : ContractCustomExcepti
         return $"ContractException: {Message}";
     }
 }
+internal class ContractCustomerNotFoundException(string message) : ContractCustomException(message)
+{
+    public override string ToString()
+    {
+        return $"ContractException: {Message}";
+    }
+}
