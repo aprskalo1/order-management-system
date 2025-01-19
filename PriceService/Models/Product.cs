@@ -8,4 +8,6 @@ public class Product
     public required string Name { get; set; }
     public required string Description { get; set; }
     public DateTime DateCreated { get; set; } = DateTime.Now;
+
+    public List<Price> Prices { get; set; }
 }
