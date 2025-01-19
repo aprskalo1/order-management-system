@@ -15,6 +15,6 @@ public class ContractController(IContractService contractService) : ControllerBa
             return BadRequest(ModelState);
 
         var contract = await contractService.CreateContractAsync(contractRequestDto);
-        return Created(contract.Id.ToString(), contract);
+        return Created($"api/contract/{contract.Id}", contract);
     }
 }

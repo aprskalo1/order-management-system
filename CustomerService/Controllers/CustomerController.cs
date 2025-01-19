@@ -15,7 +15,7 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
             return BadRequest(ModelState);
 
         var customer = await customerService.CreateCustomerAsync(customerRequestDto);
-        return Created(customer.Id.ToString(), customer);
+        return Created($"api/customer/{customer.Id}", customer);
     }
 
     [HttpGet("GetCustomerById")]
