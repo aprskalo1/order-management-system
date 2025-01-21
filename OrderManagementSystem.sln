@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderService.Tests", "Order
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PriceService.Tests", "PriceService.Tests\PriceService.Tests.csproj", "{02ED48AE-00B6-4794-9F18-6F5E9F258CFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{F722E7C9-38DA-4C85-A731-2F45D70B41D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{02ED48AE-00B6-4794-9F18-6F5E9F258CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02ED48AE-00B6-4794-9F18-6F5E9F258CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02ED48AE-00B6-4794-9F18-6F5E9F258CFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F722E7C9-38DA-4C85-A731-2F45D70B41D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F722E7C9-38DA-4C85-A731-2F45D70B41D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F722E7C9-38DA-4C85-A731-2F45D70B41D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F722E7C9-38DA-4C85-A731-2F45D70B41D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
