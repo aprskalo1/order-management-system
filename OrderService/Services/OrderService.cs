@@ -14,7 +14,7 @@ public interface IOrderService
     Task<OrderResponseDto> CreateOrderAsync(OrderRequestDto order);
 }
 
-internal class OrderService(
+public class OrderService(
     IOrderRepository orderRepository,
     IMapper mapper,
     ContractRpcClient contractRpcClient,

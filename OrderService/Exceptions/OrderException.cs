@@ -1,6 +1,6 @@
 ﻿namespace OrderService.Exceptions;
 
-internal class OrderCreationException(string message) : OrderCustomException(message)
+public class OrderCreationException(string message) : OrderCustomException(message)
 {
     public override string ToString()
     {

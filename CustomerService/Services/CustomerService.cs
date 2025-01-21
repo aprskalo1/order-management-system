@@ -16,7 +16,7 @@ public interface ICustomerService
     Task DeleteCustomerAsync(Guid id);
 }
 
-internal class CustomerService(ICustomerRepository customerRepository, IMapper mapper) : ICustomerService
+public class CustomerService(ICustomerRepository customerRepository, IMapper mapper) : ICustomerService
 {
     public async Task<CustomerResponseDto> CreateCustomerAsync(CustomerRequestDto customerRequestDto)
     {

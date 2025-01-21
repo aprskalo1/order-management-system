@@ -14,7 +14,7 @@ public interface IContractService
     Task<ContractResponseDto> GetLastContractAsync(Guid customerId);
 }
 
-internal class ContractService(IContractRepository contractRepository, IMapper mapper, CustomerRpcClient customerRpcClient) : IContractService
+public class ContractService(IContractRepository contractRepository, IMapper mapper, CustomerRpcClient customerRpcClient) : IContractService
 {
     public async Task<ContractResponseDto> CreateContractAsync(ContractRequestDto contractRequestDto)
     {

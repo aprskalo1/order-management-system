@@ -41,7 +41,7 @@ public class ContractRpcClient : IAsyncDisposable
         );
     }
 
-    public async Task<ContractData?> GetLastContractAsync(Guid customerId)
+    public virtual async Task<ContractData?> GetLastContractAsync(Guid customerId)
     {
         if (_channel is null)
             throw new InvalidOperationException("Channel not initialized. Call StartAsync first.");

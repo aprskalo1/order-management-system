@@ -15,7 +15,7 @@ public interface IProductService
     Task<ProductResponseDto> GetProductById(Guid id);
 }
 
-internal class ProductService(IProductRepository productRepository, IMapper mapper) : IProductService
+public class ProductService(IProductRepository productRepository, IMapper mapper) : IProductService
 {
     public async Task<ProductResponseDto> CreateProduct(ProductRequestDto productRequestDto)
     {

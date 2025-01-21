@@ -1,6 +1,6 @@
 ﻿namespace PriceService.Exceptions;
 
-internal class ProductNotFoundException(string message) : ProductCustomException(message)
+public class ProductNotFoundException(string message) : ProductCustomException(message)
 {
     public override string ToString()
     {
@@ -8,7 +8,7 @@ internal class ProductNotFoundException(string message) : ProductCustomException
     }
 }
 
-internal class PriceDateCorrelationException(string message) : ProductCustomException(message)
+public class PriceDateCorrelationException(string message) : ProductCustomException(message)
 {
     public override string ToString()
     {

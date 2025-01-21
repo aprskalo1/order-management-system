@@ -12,7 +12,7 @@ public interface IPriceService
     Task<PriceResponseDto> CreatePrice(PriceRequestDto priceRequestDto, Guid productId);
 }
 
-internal class PriceService(IPriceRepository priceRepository, IMapper mapper) : IPriceService
+public class PriceService(IPriceRepository priceRepository, IMapper mapper) : IPriceService
 {
     public async Task<PriceResponseDto> CreatePrice(PriceRequestDto priceRequestDto, Guid productId)
     {

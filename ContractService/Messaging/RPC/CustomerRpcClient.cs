@@ -36,7 +36,7 @@ public class CustomerRpcClient : IAsyncDisposable
         );
     }
 
-    public async Task<CustomerData?> GetCustomerAsync(Guid customerId)
+    public virtual async Task<CustomerData?> GetCustomerAsync(Guid customerId)
     {
         if (_channel is null)
             throw new InvalidOperationException("Channel is not initialized. Did you call StartAsync()?");

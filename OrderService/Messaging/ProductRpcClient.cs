@@ -36,7 +36,7 @@ public class ProductRpcClient : IAsyncDisposable
         );
     }
 
-    public async Task<ProductData?> GetProductAsync(Guid productId, DateTime effectiveDate)
+    public virtual async Task<ProductData?> GetProductAsync(Guid productId, DateTime effectiveDate)
     {
         if (_channel is null)
             throw new InvalidOperationException("Channel not initialized. Call StartAsync first.");
