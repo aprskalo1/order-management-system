@@ -37,9 +37,6 @@ namespace ContractService.Migrations
                     b.Property<double>("DiscountRate")
                         .HasColumnType("float");
 
-                    b.Property<DateTime>("ValidTo")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("Id");
 
                     b.ToTable("Contracts");

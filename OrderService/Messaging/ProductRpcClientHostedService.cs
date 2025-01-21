@@ -1,6 +1,6 @@
-﻿namespace ContractService.Messaging.RPC;
+﻿namespace OrderService.Messaging;
 
-public class RpcClientHostedService(CustomerRpcClient rpcClient) : IHostedService
+public class ProductRpcClientHostedService(ProductRpcClient rpcClient) : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {

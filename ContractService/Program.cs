@@ -20,7 +20,10 @@ builder.Services.AddScoped<IContractRepository, ContractRepository>();
 builder.Services.AddScoped<IContractService, ContractService.Services.ContractService>();
 
 builder.Services.AddSingleton<CustomerRpcClient>();
-builder.Services.AddHostedService<RpcClientHostedService>();
+builder.Services.AddHostedService<CustomerRpcClientHostedService>();
+
+builder.Services.AddSingleton<ContractRpcServer>();
+builder.Services.AddHostedService<ContractRpcServerHostedService>();
 
 var app = builder.Build();
 

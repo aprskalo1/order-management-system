@@ -10,7 +10,9 @@ namespace PriceService.Services;
 public interface IProductService
 {
     Task<ProductResponseDto> CreateProduct(ProductRequestDto productRequestDto);
-    Task<ProductResponseDto?> GetProductById(Guid id);
+
+    Task<ProductResponseDto> GetProductWithPriceDateRange(Guid productId, DateTime? effectiveDate = null);
+    Task<ProductResponseDto> GetProductById(Guid id);
 }
 
 internal class ProductService(IProductRepository productRepository, IMapper mapper) : IProductService
@@ -25,7 +27,19 @@ internal class ProductService(IProductRepository productRepository, IMapper mapp
         return mapper.Map<ProductResponseDto>(product);
     }
 
-    public async Task<ProductResponseDto?> GetProductById(Guid id)
+    public async Task<ProductResponseDto> GetProductWithPriceDateRange(Guid productId, DateTime? effectiveDate = null)
+    {
+        var product = await productRepository.GetProductWithPriceDateRange(productId, effectiveDate);
+        if (product == null)
+        {
+            throw new ProductNotFoundException($"Product with id {productId} not found");
+        }
+
+        var productDto = mapper.Map<ProductResponseDto>(product);
+        return productDto;
+    }
+
+    public async Task<ProductResponseDto> GetProductById(Guid id)
     {
         var product = await productRepository.GetProductById(id);
         if (product == null)

@@ -34,9 +34,15 @@ namespace OrderService.Migrations
                     b.Property<DateTime>("DateIssued")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("FinalPrice")
+                    b.Property<DateTime>("EffectiveDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("FinalPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("float(18)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ProductName")
                         .IsRequired()

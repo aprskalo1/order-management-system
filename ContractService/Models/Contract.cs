@@ -8,6 +8,5 @@ public class Contract
     public Guid Id { get; set; }
     public required Guid CustomerId { get; set; }
     public required double DiscountRate { get; set; }
-    public required DateTime ValidTo { get; set; }
     public DateTime DateIssued { get; set; } = DateTime.Now;
 }

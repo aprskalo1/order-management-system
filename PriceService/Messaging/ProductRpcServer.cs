@@ -1,27 +1,24 @@
 ﻿using System.Text;
 using System.Text.Json;
 using AutoMapper;
-using CustomerService.DTOs.Response;
-using CustomerService.Repositories;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using PriceService.DTOs.Response;
+using PriceService.Repositories;
+using Shared.Models;
 
-namespace CustomerService.Messaging.RPC;
+namespace PriceService.Messaging;
 
-public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper) : IAsyncDisposable
+public class ProductRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper) : IAsyncDisposable
 {
     private IConnection? _connection;
     private IChannel? _channel;
 
-    private const string QueueName = "customer_rpc_queue";
+    private const string QueueName = "product_rpc_queue";
 
     public async Task StartAsync()
     {
-        var factory = new ConnectionFactory
-        {
-            HostName = "localhost",
-        };
-
+        var factory = new ConnectionFactory { HostName = "localhost" };
         _connection = await factory.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
 
@@ -33,7 +30,7 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
             arguments: null
         );
 
-        await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false);
+        await _channel.BasicQosAsync(0, 1, false);
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += HandleRpcRequestAsync;
@@ -43,6 +40,8 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
             autoAck: false,
             consumer: consumer
         );
+
+        Console.WriteLine($"[ProductRpcServer] Listening on '{QueueName}'");
     }
 
     private async Task HandleRpcRequestAsync(object sender, BasicDeliverEventArgs ea)
@@ -60,22 +59,24 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
             var body = ea.Body.ToArray();
             var requestString = Encoding.UTF8.GetString(body);
 
-            if (Guid.TryParse(requestString, out var customerId))
+            var request = JsonSerializer.Deserialize<ProductRequest>(requestString);
+            if (request != null)
             {
-                var customerDto = await GetCustomerDtoAsync(customerId);
-                if (customerDto != null)
+                var productDto = await GetProductDtoAsync(request.ProductId, request.EffectiveDate);
+                if (productDto != null)
                 {
-                    jsonResponse = JsonSerializer.Serialize(customerDto);
+                    jsonResponse = JsonSerializer.Serialize(productDto);
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing request: {ex.Message}");
+            Console.WriteLine($"[ProductRpcServer] Error: {ex.Message}");
         }
         finally
         {
             var responseBytes = Encoding.UTF8.GetBytes(jsonResponse);
+
             if (_channel != null && ea.BasicProperties.ReplyTo != null)
             {
                 await _channel.BasicPublishAsync(
@@ -94,16 +95,15 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
         }
     }
 
-    private async Task<CustomerResponseDto?> GetCustomerDtoAsync(Guid customerId)
+    private async Task<ProductResponseDto?> GetProductDtoAsync(Guid productId, DateTime effectiveDate)
     {
         try
         {
             using var scope = scopeFactory.CreateScope();
-            var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
+            var productRepository = scope.ServiceProvider.GetRequiredService<IProductRepository>();
 
-            var customerEntity = await customerRepository.GetCustomerByIdAsync(customerId);
-
-            return customerEntity is null ? null : mapper.Map<CustomerResponseDto>(customerEntity);
+            var product = await productRepository.GetProductWithPriceDateRange(productId, effectiveDate);
+            return product == null ? null : mapper.Map<ProductResponseDto>(product);
         }
         catch
         {
@@ -113,14 +113,7 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
 
     public async ValueTask DisposeAsync()
     {
-        if (_channel is not null)
-        {
-            await _channel.CloseAsync();
-        }
-
-        if (_connection is not null)
-        {
-            await _connection.CloseAsync();
-        }
+        if (_channel != null) await _channel.CloseAsync();
+        if (_connection != null) await _connection.CloseAsync();
     }
 }

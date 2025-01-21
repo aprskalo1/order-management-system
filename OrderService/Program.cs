@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using OrderService.Data;
+using OrderService.Exceptions;
 using OrderService.Mapping;
+using OrderService.Messaging;
 using OrderService.Repositories;
 using OrderService.Services;
 
@@ -16,7 +18,12 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderService, OrderService.Services.OrderService>();
 
-builder.Services.AddControllers();
+builder.Services.AddSingleton<ProductRpcClient>();
+builder.Services.AddHostedService<ProductRpcClientHostedService>();
+builder.Services.AddSingleton<ContractRpcClient>();
+builder.Services.AddHostedService<ContractRpcClientHostedService>();
+
+builder.Services.AddControllers(options => options.Filters.Add<OrderExceptionFilter>());
 
 var app = builder.Build();
 

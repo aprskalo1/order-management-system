@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PriceService.Data;
 using PriceService.Exceptions;
 using PriceService.Mapping;
+using PriceService.Messaging;
 using PriceService.Repositories;
 using PriceService.Services;
 
@@ -19,6 +20,9 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IPriceRepository, PriceRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IPriceService, PriceService.Services.PriceService>();
+
+builder.Services.AddSingleton<ProductRpcServer>();
+builder.Services.AddHostedService<ProductRpcServerHostedService>();
 
 var app = builder.Build();
 

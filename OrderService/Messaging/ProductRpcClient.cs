@@ -5,18 +5,18 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Shared.Models;
 
-namespace ContractService.Messaging.RPC;
+namespace OrderService.Messaging;
 
-public class CustomerRpcClient : IAsyncDisposable
+public class ProductRpcClient : IAsyncDisposable
 {
+    private readonly ConnectionFactory _factory = new() { HostName = "localhost" };
     private IConnection? _connection;
     private IChannel? _channel;
     private string? _replyQueueName;
 
-    private readonly ConnectionFactory _factory = new()
-    {
-        HostName = "localhost",
-    };
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _callbackMapper = new();
+
+    private const string RequestQueueName = "product_rpc_queue";
 
     public async Task StartAsync()
     {
@@ -36,10 +36,10 @@ public class CustomerRpcClient : IAsyncDisposable
         );
     }
 
-    public async Task<CustomerData?> GetCustomerAsync(Guid customerId)
+    public async Task<ProductData?> GetProductAsync(Guid productId, DateTime effectiveDate)
     {
         if (_channel is null)
-            throw new InvalidOperationException("Channel is not initialized. Did you call StartAsync()?");
+            throw new InvalidOperationException("Channel not initialized. Call StartAsync first.");
 
         var correlationId = Guid.NewGuid().ToString();
         var props = new BasicProperties
@@ -48,11 +48,10 @@ public class CustomerRpcClient : IAsyncDisposable
             ReplyTo = _replyQueueName
         };
 
-        var messageBytes = Encoding.UTF8.GetBytes(customerId.ToString());
+        var requestObj = new ProductRequest(productId, effectiveDate);
+        var messageBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(requestObj));
 
-        var tcs = new TaskCompletionSource<string>(
-            TaskCreationOptions.RunContinuationsAsynchronously
-        );
+        var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         _callbackMapper[correlationId] = tcs;
 
         await _channel.BasicPublishAsync(
@@ -64,20 +63,21 @@ public class CustomerRpcClient : IAsyncDisposable
         );
 
         var jsonResponse = await tcs.Task;
+
         if (string.IsNullOrEmpty(jsonResponse))
         {
             return null;
         }
 
-        var customerDto = JsonSerializer.Deserialize<CustomerData>(jsonResponse);
-        return customerDto;
+        var productData = JsonSerializer.Deserialize<ProductData>(jsonResponse);
+        return productData;
     }
 
     private Task OnResponseReceivedAsync(object sender, BasicDeliverEventArgs ea)
     {
         var body = ea.Body.ToArray();
         var response = Encoding.UTF8.GetString(body);
-        var correlationId = ea.BasicProperties?.CorrelationId;
+        var correlationId = ea.BasicProperties.CorrelationId;
 
         if (!string.IsNullOrEmpty(correlationId) && _callbackMapper.TryRemove(correlationId, out var tcs))
         {
@@ -87,16 +87,9 @@ public class CustomerRpcClient : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<string>> _callbackMapper
-        = new ConcurrentDictionary<string, TaskCompletionSource<string>>();
-
-    private const string RequestQueueName = "customer_rpc_queue";
-
     public async ValueTask DisposeAsync()
     {
-        if (_channel is not null)
-            await _channel.CloseAsync();
-        if (_connection is not null)
-            await _connection.CloseAsync();
+        if (_channel != null) await _channel.CloseAsync();
+        if (_connection != null) await _connection.CloseAsync();
     }
 }

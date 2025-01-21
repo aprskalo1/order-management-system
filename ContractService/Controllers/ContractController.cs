@@ -4,17 +4,24 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ContractService.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/contracts")]
 public class ContractController(IContractService contractService) : ControllerBase
 {
-    [HttpPost("AddContract")]
+    [HttpPost]
     public async Task<IActionResult> AddContractAsync(ContractRequestDto contractRequestDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var contract = await contractService.CreateContractAsync(contractRequestDto);
-        return Created($"api/contract/{contract.Id}", contract);
+        return Created($"/api/contracts/{contract.Id}", contract);
+    }
+
+    [HttpGet("last/{customerId:guid}")]
+    public async Task<IActionResult> GetLastContractAsync(Guid customerId)
+    {
+        var contract = await contractService.GetLastContractAsync(customerId);
+        return Ok(contract);
     }
 }

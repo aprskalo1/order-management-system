@@ -1,27 +1,22 @@
 ﻿using System.Text;
 using System.Text.Json;
-using AutoMapper;
-using CustomerService.DTOs.Response;
-using CustomerService.Repositories;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using ContractService.DTOs.Response;
+using ContractService.Services;
 
-namespace CustomerService.Messaging.RPC;
+namespace ContractService.Messaging.RPC;
 
-public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper) : IAsyncDisposable
+public class ContractRpcServer(IServiceScopeFactory scopeFactory) : IAsyncDisposable
 {
     private IConnection? _connection;
     private IChannel? _channel;
 
-    private const string QueueName = "customer_rpc_queue";
+    private const string QueueName = "contract_rpc_queue";
 
     public async Task StartAsync()
     {
-        var factory = new ConnectionFactory
-        {
-            HostName = "localhost",
-        };
-
+        var factory = new ConnectionFactory { HostName = "localhost" };
         _connection = await factory.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
 
@@ -43,6 +38,8 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
             autoAck: false,
             consumer: consumer
         );
+
+        Console.WriteLine($"[ContractRpcServer] Listening on '{QueueName}'...");
     }
 
     private async Task HandleRpcRequestAsync(object sender, BasicDeliverEventArgs ea)
@@ -60,22 +57,27 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
             var body = ea.Body.ToArray();
             var requestString = Encoding.UTF8.GetString(body);
 
-            if (Guid.TryParse(requestString, out var customerId))
+            if (Guid.TryParse(requestString, out Guid customerId))
             {
-                var customerDto = await GetCustomerDtoAsync(customerId);
-                if (customerDto != null)
+                using var scope = scopeFactory.CreateScope();
+                var contractService = scope.ServiceProvider.GetRequiredService<IContractService>();
+
+                var contractDto = await TryGetLastContractAsync(contractService, customerId);
+
+                if (contractDto != null)
                 {
-                    jsonResponse = JsonSerializer.Serialize(customerDto);
+                    jsonResponse = JsonSerializer.Serialize(contractDto);
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing request: {ex.Message}");
+            Console.WriteLine($"[ContractRpcServer] Error: {ex.Message}");
         }
         finally
         {
             var responseBytes = Encoding.UTF8.GetBytes(jsonResponse);
+
             if (_channel != null && ea.BasicProperties.ReplyTo != null)
             {
                 await _channel.BasicPublishAsync(
@@ -94,16 +96,13 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
         }
     }
 
-    private async Task<CustomerResponseDto?> GetCustomerDtoAsync(Guid customerId)
+    private static async Task<ContractResponseDto?> TryGetLastContractAsync(
+        IContractService contractService,
+        Guid customerId)
     {
         try
         {
-            using var scope = scopeFactory.CreateScope();
-            var customerRepository = scope.ServiceProvider.GetRequiredService<ICustomerRepository>();
-
-            var customerEntity = await customerRepository.GetCustomerByIdAsync(customerId);
-
-            return customerEntity is null ? null : mapper.Map<CustomerResponseDto>(customerEntity);
+            return await contractService.GetLastContractAsync(customerId);
         }
         catch
         {
@@ -113,14 +112,9 @@ public class CustomerRpcServer(IServiceScopeFactory scopeFactory, IMapper mapper
 
     public async ValueTask DisposeAsync()
     {
-        if (_channel is not null)
-        {
+        if (_channel != null)
             await _channel.CloseAsync();
-        }
-
-        if (_connection is not null)
-        {
+        if (_connection != null)
             await _connection.CloseAsync();
-        }
     }
 }

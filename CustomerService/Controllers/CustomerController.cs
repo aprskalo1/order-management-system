@@ -4,35 +4,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CustomerService.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/customers")]
 public class CustomerController(ICustomerService customerService) : ControllerBase
 {
-    [HttpPost("AddCustomer")]
+    [HttpPost]
     public async Task<IActionResult> AddCustomerAsync(CustomerRequestDto customerRequestDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         var customer = await customerService.CreateCustomerAsync(customerRequestDto);
-        return Created($"api/customer/{customer.Id}", customer);
+        return Created($"/api/customers/{customer.Id}", customer);
     }
 
-    [HttpGet("GetCustomerById")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetCustomerByIdAsync(Guid id)
     {
         var customer = await customerService.GetCustomerByIdAsync(id);
         return Ok(customer);
     }
 
-    [HttpGet("ListCustomers")]
+    [HttpGet]
     public async Task<IActionResult> ListCustomersAsync()
     {
         var customers = await customerService.GetCustomersAsync();
         return Ok(customers);
     }
 
-    [HttpPut("UpdateCustomer")]
+    [HttpPut("{id:guid}")]
     public async Task<IActionResult> UpdateCustomerAsync(Guid id, CustomerRequestDto customerRequestDto)
     {
         if (!ModelState.IsValid)
@@ -42,7 +42,7 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
         return Ok(customer);
     }
 
-    [HttpDelete("DeleteCustomer")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteCustomerAsync(Guid id)
     {
         await customerService.DeleteCustomerAsync(id);
