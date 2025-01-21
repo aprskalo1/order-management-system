@@ -43,7 +43,18 @@ The microservices use RabbitMQ for communication. To set up RabbitMQ, run:
 ```bash
 docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
 ```
+### Step 4: Run Each Microservice
 
+1. **Navigate & Start Service**:
+   - Open a terminal and change to the microservice directory, e.g.:
+     ```bash
+     cd path/to/CustomerService
+     dotnet run
+     ```
+   - Repeat for each service: `CustomerService`, `ContractService`, `PriceService`, and `OrderService`.
+
+2. **Verify Startup**:
+   - Check the console for successful startup messages and ensure each service listens on its configured port.
 ---
 
 ## Usability Instructions
@@ -123,6 +134,3 @@ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-man
 - **MSSQL**: For database operations.
 - **RabbitMQ**: For inter-service communication.
 - **OpenAPI/OData**: For API definition and documentation.
-
----
-
