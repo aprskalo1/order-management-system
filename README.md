@@ -23,7 +23,7 @@ This project implements a microservices-based web API consisting of four service
 3. Docker installed and configured.
 
 ### Step 1: Adjust Connection Strings
-Update the connection strings in the following files:
+Update the connection strings in the following files for each microservice:
 - `Program.cs`
 - `appsettings.json`
 - `DbContext`
